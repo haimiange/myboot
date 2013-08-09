@@ -21,6 +21,16 @@ char uart_getc()
     return c;
 }
 
+int uart_getc_nowait(char *c)
+{
+    if(!(UFSTAT0 & 0x7f)){
+	return -1;
+    } else {
+	*c = URXH0;
+	return 0;
+    }
+}
+
 void uart_init()
 {
     GPACON &= ~0xff;

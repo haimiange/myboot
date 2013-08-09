@@ -1,4 +1,4 @@
-#include "s3c6410.h"
+#include <s3c6410.h>
 #include "led.h"
 
 void led_on(int num)
