@@ -1,14 +1,63 @@
 #include <s3c6410.h>
 #include "uart.h"
 
+#define TX_BUF_LEN   2048
+static unsigned char txbuf[2047];
+static unsigned int r_idx = 0;
+static unsigned int w_idx = 0;
+
+void uart_tx_int_enable(void)
+{
+    UINTM0 &= ~(1<<2);	
+}
+
+void uart_tx_int_disable(void)
+{
+    UINTM0 |= (1<<2);	
+}
+
+static int isFull(void)
+{
+    if ((w_idx + 1) % TX_BUF_LEN == r_idx)
+	return 1;
+    else
+	return 0;
+}
+
+static int isEmpty(void)
+{
+    return (w_idx == r_idx);
+}
+
+static int putData(unsigned char data)
+{
+    if (isFull()){
+	return -1;
+    } else {
+	txbuf[w_idx] = data;
+	w_idx = (w_idx + 1) % TX_BUF_LEN;
+	return 0;
+    }
+}
+
+static int getData(unsigned char *pdata)
+{
+    if (isEmpty()){
+	return -1;
+    } else {
+	*pdata = txbuf[r_idx];
+	r_idx = (r_idx + 1) % TX_BUF_LEN;
+	return 0;
+    }
+}
+
 void uart_putc(const char c)
 {
-    /* 如果TX FIFO 满等待 */
-    while(UFSTAT0 & (0x1<<14));
-    UTXH0 = c;
+    putData(c);
     if(c == '\n'){
-	uart_putc('\r');
+    	putData('\r');
     }
+    uart_tx_int_enable();
 }
 
 char uart_getc()
@@ -34,12 +83,51 @@ int uart_getc_nowait(char *c)
 void uart_init()
 {
     GPACON &= ~0xff;
-    GPACON |= (0x2 | (0x2<<4));
-    
-    /* ULCON0 UCON0 UFCON0 UBRDIV0 UDIVSLOT0 */
+    GPACON |= 0x22;
+	
+    /* ULCON0 */
     ULCON0 = 0x3;
-    UCON0 = (0x2<<10)|(0x1<<2)|(0x1<<0);
-    UFCON0 = 0x7;
-    UBRDIV0 = 35;
-    UDIVSLOT0 = 1;
+    UCON0  = 0x5 | (1<<9);
+    /* FIFO enable, tx fifo trigger level = 16 bytes */
+    UFCON0 = 0x07 | (1<<6);
+    UMCON0 = 0;
+	
+    /* DIV_VAL = (PCLK / (bps x 16 ) ) - 1 
+     * bps = 57600
+     * DIV_VAL = (66500000 / (115200 x 16 ) ) - 1 
+     *         = 35.08
+     */
+    UBRDIV0   = 35;
+
+    /* x/16 = 0.08
+     * x = 1
+     */
+    UDIVSLOT0 = 0x1;
+}
+
+void do_uart_irq(void)
+{
+    int i;
+    int cnt;
+    unsigned char c;
+	
+    if(UINTP0 & (1<<2)){
+	if(isEmpty()){
+	    uart_tx_int_disable();
+	} else {
+	    cnt = (UFSTAT0 >> 8) & 0x3f;
+	    cnt = 64 - cnt;
+	    for(i = 0; i < cnt; i++){
+		if(getData(&c) == 0){
+		    UTXH0 = c;
+		} else {
+		    break;
+		}
+	    }
+	}
+    } else if(UINTP0 & (1<<0)){
+        
+    }
+
+    UINTP0 = 0xf;
 }

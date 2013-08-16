@@ -53,40 +53,40 @@ void key_irq_init()
     VIC0VECTADDR1 = eint4_11_irq;
 }
 
-/* void uart_irq() */
-/* { */
-/*     /\* 调用UART中断处理函数 *\/ */
-/*     do_uart_irq(); */
-/*     /\* 清空UART中断 *\/ */
-/*     VIC1ADDRESS = 0; */
-/* } */
+void uart_irq()
+{
+    /* 调用UART中断处理函数 */
+    do_uart_irq();
+    /* 清空UART中断 */
+    VIC1ADDRESS = 0;
+}
 
-/* void uart_irq_init() */
-/* { */
-/*     /\* 使能UART中断 *\/ */
-/*     VIC1INTENABLE |= (1<<5); */
-/*     /\* 设置中断处理函数 *\/ */
-/*     VIC1VECTADDR5 = uart_irq; */
-/* } */
+void uart_irq_init()
+{
+    /* 使能UART中断 */
+    VIC1INTENABLE |= (1<<5);
+    /* 设置中断处理函数 */
+    VIC1VECTADDR5 = uart_irq;
+}
 
 void irq_init()
 {
     key_irq_init();
-    /* uart_irq_init(); */
+    uart_irq_init();
 }
 
 void do_irq()
 {
     void (*the_isr)(void);
 
-    /* if(VIC0IRQSTATUS != 0){ */
+    if(VIC0IRQSTATUS != 0){
 	the_isr = VIC0ADDRESS;
 	the_isr();
 	EINT0PEND = 0x3f;
 	VIC0ADDRESS = 0;
-    /* } /\* else if(VIC1IRQSTATUS != 0){ *\/ */
-    /* 	the_isr = VIC1ADDRESS; */
-    /* 	the_isr(); */
-    /* } */
+    } else if(VIC1IRQSTATUS != 0){
+    	the_isr = VIC1ADDRESS;
+    	the_isr();
+    }
 }
 
