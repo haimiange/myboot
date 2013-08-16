@@ -10,7 +10,7 @@ CPPFLAGS   	:= -nostdinc -I$(INCLUDEDIR)
 
 export 	CC AR LD OBJCOPY OBJDUMP INCLUDEDIR CFLAGS CPPFLAGS
 
-obj := start.o main.o clock.o uart.o sdram.o nand.o lib/libc.a
+obj := start.o main.o clock.o uart.o sdram.o nand.o lib/libc.a irq.o
 
 u-boot.bin:$(obj)
 	${LD} -T u-boot.lds -g $(obj) -o u-boot.elf
@@ -31,6 +31,8 @@ uart.o:uart/uart.c
 sdram.o:sdram/sdram.c
 	${CC} $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 nand.o:nand/nand.c
+	${CC} $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+irq.o:irq/irq.c
 	${CC} $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 led_program:led.o sleep.o led_program.o

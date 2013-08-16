@@ -4,6 +4,12 @@
 #include "uart/uart.h"
 #include "nand/nand.h"
 
+int print_cpsr(unsigned long cpsr,char* str)
+{
+    printf("In %s mode: cpsr = 0x%x\n",str,cpsr);
+    return 0;
+}
+
 void nand_write_test()
 {
     char buf[100];
@@ -122,7 +128,6 @@ int main()
 {
     char c;
 
-    uart_init();
     printf("\n------------MYBOOT LIUJIANG--------------\n");
     while(1){
 	printf("\n[w] write data to the nand flash\n");
