@@ -82,10 +82,10 @@ on_ddr:
 
 	ldr sp,=0x57000000
 
-	ldr r1,=usr_str
-	bl print_cpsr
+	@@ ldr r1,=usr_str
+	@@ bl print_cpsr
 
-	swi 0
+	@@ swi 0
 	
 	ldr pc,=main
 halt:

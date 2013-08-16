@@ -2,9 +2,11 @@
 #include "uart.h"
 
 #define TX_BUF_LEN   2048
-static unsigned char txbuf[2047];
-static unsigned int r_idx = 0;
-static unsigned int w_idx = 0;
+#define RX_BUF_LEN   2048
+
+static unsigned char txbuf[2048];
+static unsigned int r_tx_idx = 0;
+static unsigned int w_tx_idx = 0;
 
 void uart_tx_int_enable(void)
 {
@@ -16,46 +18,46 @@ void uart_tx_int_disable(void)
     UINTM0 |= (1<<2);	
 }
 
-static int isFull(void)
+static int is_tx_full(void)
 {
-    if ((w_idx + 1) % TX_BUF_LEN == r_idx)
+    if ((w_tx_idx + 1) % TX_BUF_LEN == r_tx_idx)
 	return 1;
     else
 	return 0;
 }
 
-static int isEmpty(void)
+static int is_tx_empty(void)
 {
-    return (w_idx == r_idx);
+    return (w_tx_idx == r_tx_idx);
 }
 
-static int putData(unsigned char data)
+static int tx_put_data(unsigned char data)
 {
-    if (isFull()){
+    if (is_tx_full()){
 	return -1;
     } else {
-	txbuf[w_idx] = data;
-	w_idx = (w_idx + 1) % TX_BUF_LEN;
+	txbuf[w_tx_idx] = data;
+	w_tx_idx = (w_tx_idx + 1) % TX_BUF_LEN;
 	return 0;
     }
 }
 
-static int getData(unsigned char *pdata)
+static int tx_get_data(unsigned char *pdata)
 {
-    if (isEmpty()){
+    if (is_tx_empty()){
 	return -1;
     } else {
-	*pdata = txbuf[r_idx];
-	r_idx = (r_idx + 1) % TX_BUF_LEN;
+	*pdata = txbuf[r_tx_idx];
+	r_tx_idx = (r_tx_idx + 1) % TX_BUF_LEN;
 	return 0;
     }
 }
 
 void uart_putc(const char c)
 {
-    putData(c);
+    tx_put_data(c);
     if(c == '\n'){
-    	putData('\r');
+    	tx_put_data('\r');
     }
     uart_tx_int_enable();
 }
@@ -112,13 +114,13 @@ void do_uart_irq(void)
     unsigned char c;
 	
     if(UINTP0 & (1<<2)){
-	if(isEmpty()){
+	if(is_tx_empty()){
 	    uart_tx_int_disable();
 	} else {
 	    cnt = (UFSTAT0 >> 8) & 0x3f;
 	    cnt = 64 - cnt;
 	    for(i = 0; i < cnt; i++){
-		if(getData(&c) == 0){
+		if(tx_get_data(&c) == 0){
 		    UTXH0 = c;
 		} else {
 		    break;
