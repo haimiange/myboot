@@ -27,7 +27,7 @@ _irq:
 	.word vector_irq
 	
 vector_irq:
-	ldr sp, = 0x54000000
+	ldr sp, = 0x58000000
 	sub lr,lr,#4
 	stmdb sp!,{r0-r12,lr}
 	bl do_irq
@@ -74,6 +74,7 @@ clean_loop:
 on_ddr:
 	bl uart_init
 	bl irq_init
+	bl lcd_init
 
 	mrs r0,cpsr
 	bic r0,r0,#0x9f

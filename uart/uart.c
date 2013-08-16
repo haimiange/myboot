@@ -56,8 +56,10 @@ static int tx_get_data(unsigned char *pdata)
 void uart_putc(const char c)
 {
     tx_put_data(c);
+    lcd_putc(c);
     if(c == '\n'){
     	tx_put_data('\r');
+	lcd_putc('\r');
     }
     uart_tx_int_enable();
 }

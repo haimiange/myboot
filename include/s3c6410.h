@@ -63,4 +63,28 @@
 #define VIC1INTENABLE  (*((volatile unsigned long *)0x71300010))
 #define VIC1ADDRESS        (*((volatile unsigned long *)0x71300f00))
 
+/* LCD */
+#define GPECON  (*((volatile unsigned long *)0x7F008080))
+#define GPEDAT  (*((volatile unsigned long *)0x7F008084))
+#define GPFCON  (*((volatile unsigned long *)0x7F0080A0))
+#define GPFDAT  (*((volatile unsigned long *)0x7F0080A4))
+#define GPICON  (*((volatile unsigned long *)0x7F008100))
+#define GPJCON  (*((volatile unsigned long *)0x7F008120))
+
+/* display controller */
+#define MIFPCON     (*((volatile unsigned long *)0x7410800C))
+#define SPCON         (*((volatile unsigned long *)0x7F0081A0))
+#define VIDCON0      (*((volatile unsigned long *)0x77100000))
+#define VIDCON1      (*((volatile unsigned long *)0x77100004))
+#define VIDTCON0     (*((volatile unsigned long *)0x77100010))
+#define VIDTCON1     (*((volatile unsigned long *)0x77100014))
+#define VIDTCON2     (*((volatile unsigned long *)0x77100018))
+#define WINCON0      (*((volatile unsigned long *)0x77100020))
+#define VIDOSD0A      (*((volatile unsigned long *)0x77100040))
+#define VIDOSD0B      (*((volatile unsigned long *)0x77100044))
+#define VIDOSD0C      (*((volatile unsigned long *)0x77100048))
+#define VIDW00ADD0B0      (*((volatile unsigned long *)0x771000A0))
+#define VIDW00ADD1B0      (*((volatile unsigned long *)0x771000D0))
+#define VIDW00ADD2      (*((volatile unsigned long *)0x77100100))
+
 #endif
